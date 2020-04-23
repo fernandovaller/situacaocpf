@@ -22,13 +22,25 @@ const getCPF = async (cpf) => {
   });
   const page = await browser.newPage();
 
-  await page.goto('https://www.situacao-cadastral.com/');
-  await page.waitFor('input[name="doc"]');
-  await page.type('input[name="doc"]', cpf, {delay: 180});
-  await page.keyboard.press('Enter');
-  await page.waitFor('#resultado');
-  await page.screenshot({path:`../uploads/prints/cpf-${cpf}.png`});
-  console.log(`Dados do CPF: ${cpf} foram salvos`);
+  try {
+
+    await page.goto('https://www.situacao-cadastral.com/', {waitUntil: 'networkidle2'});
+    await page.waitFor('input[name="doc"]');
+    await page.type('input[name="doc"]', cpf, {delay: 180});
+    await page.keyboard.press('Enter');
+
+    try {
+      await page.waitFor('#resultado', {waitUntil: 'networkidle2'});
+    } catch (error) {
+      console.log('Erro: Sem retorno!');
+    }
+
+    await page.screenshot({path:`../uploads/cpf-${cpf}.png`});
+    console.log(`Dados do CPF: ${cpf} foram salvos`);
+
+  } catch (error) {
+    console.error(error);
+  }
 
   await browser.close();
 }
